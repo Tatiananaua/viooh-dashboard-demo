@@ -440,52 +440,53 @@ export default function Layout() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
 
         {/* Top bar */}
-        <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '0.55rem 1rem 0.55rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, gap: '0.75rem' }}>
+        <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '0.55rem 1rem 0.55rem 1.25rem', display: 'flex', flexDirection: collapsed ? 'column' : 'row', alignItems: collapsed ? 'stretch' : 'center', justifyContent: 'space-between', flexShrink: 0, gap: collapsed ? '0.4rem' : '0.75rem' }}>
 
-          {/* Left */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-            {collapsed && (
-              <button
-                onClick={() => setDrawerOpen(o => !o)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx4)', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="3" y1="6"  x2="21" y2="6"/>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
-                  <line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-              </button>
-            )}
+          {/* Main row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+            {/* Left */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+              {collapsed && (
+                <button
+                  onClick={() => setDrawerOpen(o => !o)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx4)', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </button>
+              )}
 
-            {collapsed ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--tx1)', letterSpacing: '1px', flexShrink: 0 }}>
+              {collapsed ? (
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--tx1)', letterSpacing: '1px' }}>
                   VIOOH <span style={{ color: '#3b82f6' }}>OPS</span>
                 </span>
-                <DateRangePicker />
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <StatusPill color="#ef4444" bg="#fef2f2" label={`${totalCritical} Critical`} />
-                <StatusPill color="#f59e0b" bg="#fffbeb" label={`${totalOpen} Open`} />
-                <StatusPill color="#22c55e" bg="#f0fdf4" label={`${businesses.length} Businesses`} />
-                <span style={{ color: 'var(--border)' }}>|</span>
-                {/* Date range */}
-                <DateRangePicker />
-                <span style={{ color: 'var(--border)' }}>|</span>
-                <LastUpdatedBadge ts={lastUpdated} />
-              </div>
-            )}
+              ) : (
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <StatusPill color="#ef4444" bg="#fef2f2" label={`${totalCritical} Critical`} />
+                  <StatusPill color="#f59e0b" bg="#fffbeb" label={`${totalOpen} Open`} />
+                  <StatusPill color="#22c55e" bg="#f0fdf4" label={`${businesses.length} Businesses`} />
+                  <span style={{ color: 'var(--border)' }}>|</span>
+                  <DateRangePicker />
+                  <span style={{ color: 'var(--border)' }}>|</span>
+                  <LastUpdatedBadge ts={lastUpdated} />
+                </div>
+              )}
+            </div>
+
+            {/* Right actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+              <DarkToggle />
+              <BellButton />
+              <div style={{ width: '1px', height: '20px', background: 'var(--border)' }} />
+              <UserMenu isMobile={isMobile} />
+            </div>
           </div>
 
-          {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-            <DarkToggle />
-            <BellButton />
-            <div style={{ width: '1px', height: '20px', background: 'var(--border)' }} />
-            {/* User dropdown */}
-            <UserMenu isMobile={isMobile} />
-          </div>
+          {/* Mobile — DateRangePicker on its own row */}
+          {collapsed && <DateRangePicker />}
         </div>
 
         {/* Page content */}

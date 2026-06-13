@@ -354,30 +354,30 @@ function TicketDonut() {
   ]
   const pct = filteredTickets.length ? Math.round((resolved / filteredTickets.length) * 100) : 0
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-      <div style={{ position: 'relative', width: 120, height: 120, flexShrink: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', height: '100%' }}>
+      <div style={{ position: 'relative', width: 160, height: 160, flexShrink: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} cx="50%" cy="50%" innerRadius={38} outerRadius={54}
+            <Pie data={data} cx="50%" cy="50%" innerRadius={52} outerRadius={72}
               dataKey="value" startAngle={90} endAngle={-270} strokeWidth={0}>
               {data.map((d, i) => <Cell key={i} fill={d.color} />)}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#22c55e' }}>{pct}%</span>
-          <span style={{ fontSize: '0.58rem', color: 'var(--tx6)' }}>resolved</span>
+          <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#22c55e' }}>{pct}%</span>
+          <span style={{ fontSize: '0.62rem', color: 'var(--tx6)' }}>resolved</span>
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {data.map(d => (
-          <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: d.color, flexShrink: 0 }} />
+          <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
+            <span style={{ width: '11px', height: '11px', borderRadius: '50%', background: d.color, flexShrink: 0 }} />
             <span style={{ color: 'var(--tx5)' }}>{d.name}</span>
             <span style={{ fontWeight: 700, color: 'var(--tx2)' }}>{d.value}</span>
           </div>
         ))}
-        <div style={{ fontSize: '0.7rem', color: 'var(--tx6)', marginTop: '2px' }}>{filteredTickets.length} total tickets</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--tx6)', marginTop: '2px' }}>{filteredTickets.length} total tickets</div>
       </div>
     </div>
   )
