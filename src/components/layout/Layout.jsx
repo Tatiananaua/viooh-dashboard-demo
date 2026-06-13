@@ -458,9 +458,12 @@ export default function Layout() {
             )}
 
             {collapsed ? (
-              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--tx1)', letterSpacing: '1px' }}>
-                VIOOH <span style={{ color: '#3b82f6' }}>OPS</span>
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--tx1)', letterSpacing: '1px', flexShrink: 0 }}>
+                  VIOOH <span style={{ color: '#3b82f6' }}>OPS</span>
+                </span>
+                <DateRangePicker />
+              </div>
             ) : (
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <StatusPill color="#ef4444" bg="#fef2f2" label={`${totalCritical} Critical`} />

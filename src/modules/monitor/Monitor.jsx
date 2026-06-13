@@ -24,7 +24,7 @@ const RING_META = [
 ]
 
 // ─── Activity Rings (SVG) ─────────────────────────────────────
-function ActivityRings({ revenuePercent, ticketPercent, screenPercent, size = 108 }) {
+function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipValues, size = 108 }) {
   const cx = size / 2
   const cy = size / 2
   const containerRef = useRef(null)
@@ -37,8 +37,7 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, size = 10
   ]
 
   function handleMouseMove(e, i) {
-    const rect = containerRef.current.getBoundingClientRect()
-    setTooltip({ x: e.clientX - rect.left, y: e.clientY - rect.top, index: i })
+    setTooltip({ x: e.clientX, y: e.clientY, index: i })
   }
 
   return (
@@ -69,22 +68,27 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, size = 10
 
       {tooltip !== null && (
         <div style={{
-          position: 'absolute',
-          left: tooltip.x + 10,
-          top: tooltip.y - 28,
+          position: 'fixed',
+          left: tooltip.x + 12,
+          top: tooltip.y - 36,
           background: '#1e293b',
           color: '#fff',
           borderRadius: '7px',
-          padding: '4px 9px',
+          padding: '5px 10px',
           fontSize: '0.7rem',
           fontWeight: 500,
           pointerEvents: 'none',
           whiteSpace: 'nowrap',
-          zIndex: 10,
+          zIndex: 9999,
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}>
           <span style={{ color: RING_META[tooltip.index].color, marginRight: 5 }}>●</span>
-          {RING_META[tooltip.index].label}: <strong>{rings[tooltip.index].value.toFixed(0)}%</strong>
+          {RING_META[tooltip.index].label}:{' '}
+          <strong>
+            {tooltipValues
+              ? tooltipValues[tooltip.index]
+              : `${rings[tooltip.index].value.toFixed(0)}%`}
+          </strong>
         </div>
       )}
     </div>
@@ -179,6 +183,11 @@ function BusinessCard({ business, onClick }) {
         revenuePercent={revenuePercent}
         ticketPercent={ticketPercent}
         screenPercent={screenPercent}
+        tooltipValues={[
+          `$${(business.revenue.actual / 1000).toFixed(1)}k / $${(business.revenue.target / 1000).toFixed(1)}k`,
+          `${business.tickets.total - business.tickets.open} / ${business.tickets.total} resolved`,
+          `${business.screenUsage}%`,
+        ]}
       />
 
       <div style={{ textAlign: 'center' }}>
