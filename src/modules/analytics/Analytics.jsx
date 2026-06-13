@@ -147,7 +147,7 @@ function FullscreenOverlay({ title, subtitle, onClose, children }) {
 }
 
 // ─── Draggable card ───────────────────────────────────────────
-function DraggableCard({ title, subtitle, children, csvData, csvFilename, lastUpdated, isMobile }) {
+function DraggableCard({ title, subtitle, children, csvData, csvFilename, lastUpdated }) {
   const [fullscreen, setFullscreen] = useState(false)
   const cardRef = useRef(null)
 
@@ -179,7 +179,7 @@ function DraggableCard({ title, subtitle, children, csvData, csvFilename, lastUp
       <div ref={cardRef} style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', overflow: 'hidden' }}>
         <div
           className="drag-handle"
-          style={{ padding: '0.75rem 1rem 0.6rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: isMobile ? 'default' : 'grab', userSelect: 'none', flexShrink: 0, gap: '0.5rem' }}
+          style={{ padding: '0.75rem 1rem 0.6rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'grab', userSelect: 'none', flexShrink: 0, gap: '0.5rem' }}
         >
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--tx1)' }}>{title}</div>
@@ -212,7 +212,7 @@ function DraggableCard({ title, subtitle, children, csvData, csvFilename, lastUp
                 <line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
             </CardActionBtn>
-            {!isMobile && (
+            {(
               <svg width="14" height="14" viewBox="0 0 18 18" fill="var(--tx5)" style={{ opacity: 0.4, marginLeft: '4px' }}>
                 <circle cx="6" cy="4" r="1.4"/><circle cx="12" cy="4" r="1.4"/>
                 <circle cx="6" cy="9" r="1.4"/><circle cx="12" cy="9" r="1.4"/>
@@ -398,7 +398,8 @@ export default function Analytics() {
   const { fmtK: fmt$, fmtM, fmtMshort } = makeFormatters(settings.currency, rates)
   const gridColor = dark ? '#334155' : '#f1f5f9'
   const targetBarColor = dark ? '#334155' : '#e2e8f0'
-  const [layout, setLayout] = useState(loadLayout)
+  const [layout, setLayout]             = useState(loadLayout)
+  const [mobileLayout, setMobileLayout] = useState(MOBILE_LAYOUT)
 
   if (loading) {
     return (
@@ -512,15 +513,15 @@ export default function Analytics() {
 
       {/* Draggable widgets */}
       <RGL
-        layout={isMobile ? MOBILE_LAYOUT : layout}
+        layout={isMobile ? mobileLayout : layout}
         cols={isMobile ? 1 : 12}
         rowHeight={isMobile ? 50 : 45}
         margin={[12, 12]}
-        isDraggable={!isMobile}
+        isDraggable
         isResizable={!isMobile}
         draggableHandle=".drag-handle"
         draggableCancel=".no-drag"
-        onLayoutChange={isMobile ? undefined : handleLayoutChange}
+        onLayoutChange={isMobile ? l => setMobileLayout(l) : handleLayoutChange}
         style={{ minHeight: '300px' }}
       >
         {/* Daily Revenue */}
