@@ -37,6 +37,16 @@ const DEFAULT_LAYOUT = [
   { i: 'screenUsage',     x: 0, y: 14, w: 12, h: 6, minH: 4, minW: 6 },
 ]
 
+// Mobile layout — each card gets height tuned to its content
+const MOBILE_LAYOUT = [
+  { i: 'daily',           x: 0, y: 0,  w: 1, h: 7, minH: 4, minW: 1 },
+  { i: 'ticketStatus',    x: 0, y: 7,  w: 1, h: 5, minH: 3, minW: 1 },
+  { i: 'ticketPriority',  x: 0, y: 12, w: 1, h: 5, minH: 3, minW: 1 },
+  { i: 'monthly',         x: 0, y: 17, w: 1, h: 7, minH: 4, minW: 1 },
+  { i: 'revenueBusiness', x: 0, y: 24, w: 1, h: 9, minH: 4, minW: 1 },
+  { i: 'screenUsage',     x: 0, y: 33, w: 1, h: 9, minH: 4, minW: 1 },
+]
+
 function loadLayout() {
   try {
     const saved = localStorage.getItem(LAYOUT_KEY)
@@ -502,9 +512,7 @@ export default function Analytics() {
 
       {/* Draggable widgets */}
       <RGL
-        layout={isMobile
-          ? DEFAULT_LAYOUT.map((item, i) => ({ ...item, x: 0, y: i * 8, w: 1, h: 8 }))
-          : layout}
+        layout={isMobile ? MOBILE_LAYOUT : layout}
         cols={isMobile ? 1 : 12}
         rowHeight={isMobile ? 50 : 45}
         margin={[12, 12]}

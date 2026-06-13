@@ -34,6 +34,12 @@ const DEFAULT_LAYOUT = [
   { i: 'table',   x: 0, y: 6, w: 12, h: 9, minH: 5, minW: 6 },
 ]
 
+const MOBILE_LAYOUT = [
+  { i: 'daily',   x: 0, y: 0,  w: 1, h: 7,  minH: 4, minW: 1 },
+  { i: 'monthly', x: 0, y: 7,  w: 1, h: 7,  minH: 4, minW: 1 },
+  { i: 'table',   x: 0, y: 14, w: 1, h: 12, minH: 5, minW: 1 },
+]
+
 function loadLayout() {
   try {
     const saved = localStorage.getItem(LAYOUT_KEY)
@@ -460,9 +466,7 @@ export default function Revenue() {
 
       {/* Draggable / resizable widgets */}
       <RGL
-        layout={isMobile
-          ? DEFAULT_LAYOUT.map((item, i) => ({ ...item, x: 0, y: i * 8, w: 1, h: 8 }))
-          : layout}
+        layout={isMobile ? MOBILE_LAYOUT : layout}
         cols={isMobile ? 1 : 12}
         rowHeight={isMobile ? 50 : 45}
         margin={[12, 12]}
