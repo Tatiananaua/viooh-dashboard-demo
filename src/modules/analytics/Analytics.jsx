@@ -27,7 +27,8 @@ import { EmptyState } from '../../components/ui/EmptyState'
 
 const RGL = WidthProvider(GridLayout)
 
-const LAYOUT_KEY = 'viooh-analytics-layout'
+const LAYOUT_KEY        = 'viooh-analytics-layout'
+const MOBILE_LAYOUT_KEY = 'viooh-analytics-layout-mobile'
 const DEFAULT_LAYOUT = [
   { i: 'daily',           x: 0, y: 0,  w: 8,  h: 7, minH: 4, minW: 4 },
   { i: 'ticketStatus',    x: 8, y: 0,  w: 4,  h: 4, minH: 3, minW: 3 },
@@ -53,6 +54,15 @@ function loadLayout() {
     return saved ? JSON.parse(saved) : DEFAULT_LAYOUT
   } catch {
     return DEFAULT_LAYOUT
+  }
+}
+
+function loadMobileLayout() {
+  try {
+    const saved = localStorage.getItem(MOBILE_LAYOUT_KEY)
+    return saved ? JSON.parse(saved) : MOBILE_LAYOUT
+  } catch {
+    return MOBILE_LAYOUT
   }
 }
 
@@ -399,7 +409,7 @@ export default function Analytics() {
   const gridColor = dark ? '#334155' : '#f1f5f9'
   const targetBarColor = dark ? '#334155' : '#e2e8f0'
   const [layout, setLayout]             = useState(loadLayout)
-  const [mobileLayout, setMobileLayout] = useState(MOBILE_LAYOUT)
+  const [mobileLayout, setMobileLayout] = useState(loadMobileLayout)
 
   if (loading) {
     return (
@@ -444,6 +454,11 @@ export default function Analytics() {
     localStorage.removeItem(LAYOUT_KEY)
   }
 
+  const resetMobileLayout = () => {
+    setMobileLayout(MOBILE_LAYOUT)
+    localStorage.removeItem(MOBILE_LAYOUT_KEY)
+  }
+
   const totalRevenue = businesses.reduce((s, b) => s + b.revenue.actual, 0)
   const totalTarget  = businesses.reduce((s, b) => s + b.revenue.target, 0)
   const networkUptime = businesses.length
@@ -477,18 +492,20 @@ export default function Analytics() {
             {fmtDate(from, settings.dateFormat)} – {fmtDate(to, settings.dateFormat)}
           </p>
         </div>
-        {!isMobile && <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
           <button
-            onClick={resetLayout}
+            onClick={isMobile ? resetMobileLayout : resetLayout}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem 0.9rem', fontSize: '0.78rem', fontWeight: 500, color: 'var(--tx4)', cursor: 'pointer' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = 'var(--tx2)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx4)' }}
           >
             ↺ Reset layout
           </button>
-          <ExportBtn label="Revenue CSV" onClick={() => exportCsv(analytics.revenueByMonth, ['month', 'revenue', 'target'], 'viooh-revenue.csv')} />
-          <ExportBtn label="Tickets CSV" onClick={() => exportCsv(tickets, ['id', 'business', 'city', 'priority', 'status', 'createdAt'], 'viooh-tickets.csv')} />
-        </div>}
+          {!isMobile && <>
+            <ExportBtn label="Revenue CSV" onClick={() => exportCsv(analytics.revenueByMonth, ['month', 'revenue', 'target'], 'viooh-revenue.csv')} />
+            <ExportBtn label="Tickets CSV" onClick={() => exportCsv(tickets, ['id', 'business', 'city', 'priority', 'status', 'createdAt'], 'viooh-tickets.csv')} />
+          </>}
+        </div>
       </div>
 
       {/* KPI row — fixed */}
@@ -521,7 +538,9 @@ export default function Analytics() {
         isResizable={!isMobile}
         draggableHandle=".drag-handle"
         draggableCancel=".no-drag"
-        onLayoutChange={isMobile ? l => setMobileLayout(l) : handleLayoutChange}
+        onLayoutChange={isMobile
+          ? l => { setMobileLayout(l); localStorage.setItem(MOBILE_LAYOUT_KEY, JSON.stringify(l)) }
+          : handleLayoutChange}
         style={{ minHeight: '300px' }}
       >
         {/* Daily Revenue */}
