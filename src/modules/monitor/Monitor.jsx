@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import PageTitle from '../../components/ui/PageTitle'
 import { SavedFiltersBar } from '../../components/ui/SavedFiltersBar'
 import { useNavigate } from 'react-router-dom'
@@ -89,7 +90,7 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipVa
         })}
       </svg>
 
-      {tooltip !== null && (
+      {tooltip !== null && createPortal(
         <div style={{
           position: 'fixed',
           left: tooltip.x + 12,
@@ -112,7 +113,8 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipVa
               ? tooltipValues[tooltip.index]
               : `${rings[tooltip.index].value.toFixed(0)}%`}
           </strong>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -166,7 +168,7 @@ function ActivityRingsLarge({ revenuePercent, ticketPercent, screenPercent, tool
         <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--tx6)" fontSize="8.5">INDEX</text>
       </svg>
 
-      {tooltip !== null && (
+      {tooltip !== null && createPortal(
         <div style={{
           position: 'fixed', left: tooltip.x + 12, top: tooltip.y - 36,
           background: '#1e293b', color: '#fff', borderRadius: '7px',
@@ -181,7 +183,8 @@ function ActivityRingsLarge({ revenuePercent, ticketPercent, screenPercent, tool
               ? tooltipValues[tooltip.index]
               : `${rings[tooltip.index].value.toFixed(0)}%`}
           </strong>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
