@@ -8,6 +8,9 @@ import { useTheme } from '../../context/ThemeContext'
 import { useUserScope } from '../../context/UserScopeContext'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { CardGridSkeleton, KpiSkeleton } from '../../components/ui/Skeleton'
+import { useSettings } from '../../context/SettingsContext'
+import { useCurrencyRates } from '../../hooks/useCurrencyRates'
+import { makeFormatters } from '../../utils/currency'
 
 // ─── Status ───────────────────────────────────────────────────
 const STATUS = {
@@ -140,6 +143,9 @@ function getRingValues(b) {
 // ─── Business Card ────────────────────────────────────────────
 function BusinessCard({ business, onClick }) {
   const navigate = useNavigate()
+  const { settings } = useSettings()
+  const { rates } = useCurrencyRates()
+  const { fmtK } = makeFormatters(settings.currency, rates)
   const { revenuePercent, ticketPercent, screenPercent } = getRingValues(business)
   const s = STATUS[business.status]
 
@@ -184,7 +190,7 @@ function BusinessCard({ business, onClick }) {
         ticketPercent={ticketPercent}
         screenPercent={screenPercent}
         tooltipValues={[
-          `$${(business.revenue.actual / 1000).toFixed(1)}k / $${(business.revenue.target / 1000).toFixed(1)}k`,
+          `${fmtK(business.revenue.actual)} / ${fmtK(business.revenue.target)}`,
           `${business.tickets.total - business.tickets.open} / ${business.tickets.total} resolved`,
           `${business.screenUsage}%`,
         ]}
@@ -202,7 +208,7 @@ function BusinessCard({ business, onClick }) {
           title="View in Revenue tab"
           onClick={e => { e.stopPropagation(); navigate('/revenue', { state: { businessId: business.id } }) }}
           style={{ color: '#ef4444', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline dotted' }}
-        >${(business.revenue.actual / 1000).toFixed(0)}k</span>
+        >{fmtK(business.revenue.actual)}</span>
         <span style={{ color: business.tickets.critical > 0 ? '#ef4444' : '#22c55e' }}>
           {business.tickets.critical > 0 ? `${business.tickets.critical} crit` : 'No critical'}
         </span>
@@ -234,6 +240,9 @@ function StatBlock({ accent, bg, label, main, sub }) {
 // ─── Detail Modal ─────────────────────────────────────────────
 function Modal({ business, onClose }) {
   const navigate = useNavigate()
+  const { settings } = useSettings()
+  const { rates } = useCurrencyRates()
+  const { fmtK } = makeFormatters(settings.currency, rates)
   if (!business) return null
   const { revenuePercent, ticketPercent, screenPercent } = getRingValues(business)
   const s = STATUS[business.status]
@@ -327,10 +336,10 @@ function Modal({ business, onClose }) {
           <StatBlock
             accent="#ef4444" bg="#fef2f2"
             label="REVENUE"
-            main={`$${business.revenue.actual.toLocaleString()}`}
+            main={fmtK(business.revenue.actual)}
             sub={revenueGap > 0
-              ? `Target $${business.revenue.target.toLocaleString()} · Gap -$${revenueGap.toLocaleString()}`
-              : `Target hit · +$${Math.abs(revenueGap).toLocaleString()} above`}
+              ? `Target ${fmtK(business.revenue.target)} · Gap -${fmtK(revenueGap)}`
+              : `Target hit · +${fmtK(Math.abs(revenueGap))} above`}
           />
           <StatBlock
             accent="#94a3b8" bg="var(--surface2)"
@@ -437,6 +446,9 @@ export default function Monitor() {
   const { businesses: allBusinesses, loading } = useLiveData()
   const { filterByCountry } = useUserScope()
   const businesses = filterByCountry(allBusinesses)
+  const { settings } = useSettings()
+  const { rates } = useCurrencyRates()
+  const { fmtM } = makeFormatters(settings.currency, rates)
   const [selected, setSelected]             = useState(null)
   const [statusFilter, setStatusFilter]     = useState('all')
   const [selectedCountries, setSelectedCountries] = useState(new Set())
@@ -516,7 +528,7 @@ export default function Monitor() {
         marginBottom: '1.25rem',
       }}>
         {[
-          { label: 'Total Revenue',    value: `$${(totalRevenue / 1000000).toFixed(2)}M`, accent: '#22c55e', to: null },
+          { label: 'Total Revenue',    value: fmtM(totalRevenue),                          accent: '#22c55e', to: null },
           { label: 'Businesses',       value: businesses.length,                           accent: '#3b82f6', to: null },
           { label: 'Critical Tickets', value: totalCritical,                               accent: '#ef4444', to: { priority: 'Critical', status: 'Open' } },
           { label: 'Avg Screen Usage', value: `${avgScreen}%`,                             accent: 'var(--tx4)', to: null },
