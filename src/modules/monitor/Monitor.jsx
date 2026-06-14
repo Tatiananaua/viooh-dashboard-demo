@@ -118,35 +118,72 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipVa
   )
 }
 
-function ActivityRingsLarge({ revenuePercent, ticketPercent, screenPercent }) {
+function ActivityRingsLarge({ revenuePercent, ticketPercent, screenPercent, tooltipValues }) {
   const size = 196
   const cx = size / 2, cy = size / 2
+  const svgRef = useRef(null)
+  const [tooltip, setTooltip] = useState(null)
   const rings = [
     { r: 80, sw: 14, value: revenuePercent, color: '#22c55e', track: '#ef4444' },
     { r: 60, sw: 14, value: ticketPercent,  color: '#3b82f6', track: '#ef4444' },
     { r: 40, sw: 14, value: screenPercent,  color: '#94a3b8', track: '#ef4444' },
   ]
+
+  function handleMouseMove(e) {
+    const rect = svgRef.current.getBoundingClientRect()
+    const dist = Math.sqrt((e.clientX - rect.left - cx) ** 2 + (e.clientY - rect.top - cy) ** 2)
+    let hit = null, minDiff = Infinity
+    rings.forEach((ring, i) => {
+      const diff = Math.abs(dist - ring.r)
+      if (diff <= ring.sw / 2 + 6 && diff < minDiff) { hit = i; minDiff = diff }
+    })
+    setTooltip(hit !== null ? { x: e.clientX, y: e.clientY, index: hit } : null)
+  }
+
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {rings.map((ring, i) => {
-        const circ = 2 * Math.PI * ring.r
-        const dash = Math.max(0, Math.min(ring.value / 100, 1)) * circ
-        const gap  = circ - dash
-        return (
-          <g key={i}>
-            <circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={ring.track} strokeWidth={ring.sw} />
-            <circle cx={cx} cy={cy} r={ring.r} fill="none"
-              stroke={ring.color} strokeWidth={ring.sw}
-              strokeDasharray={`${dash} ${gap}`}
-              strokeLinecap="round"
-              transform={`rotate(-90 ${cx} ${cy})`}
-            />
-          </g>
-        )
-      })}
-      <text x={cx} y={cy - 5} textAnchor="middle" fill="var(--tx4)" fontSize="9.5" fontWeight="700" letterSpacing="1">HEALTH</text>
-      <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--tx6)" fontSize="8.5">INDEX</text>
-    </svg>
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg ref={svgRef} width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+        onMouseMove={handleMouseMove} onMouseLeave={() => setTooltip(null)}
+        style={{ cursor: 'crosshair', display: 'block' }}
+      >
+        {rings.map((ring, i) => {
+          const circ = 2 * Math.PI * ring.r
+          const dash = Math.max(0, Math.min(ring.value / 100, 1)) * circ
+          const gap  = circ - dash
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={ring.track} strokeWidth={ring.sw} />
+              <circle cx={cx} cy={cy} r={ring.r} fill="none"
+                stroke={ring.color} strokeWidth={ring.sw}
+                strokeDasharray={`${dash} ${gap}`}
+                strokeLinecap="round"
+                transform={`rotate(-90 ${cx} ${cy})`}
+              />
+            </g>
+          )
+        })}
+        <text x={cx} y={cy - 5} textAnchor="middle" fill="var(--tx4)" fontSize="9.5" fontWeight="700" letterSpacing="1">HEALTH</text>
+        <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--tx6)" fontSize="8.5">INDEX</text>
+      </svg>
+
+      {tooltip !== null && (
+        <div style={{
+          position: 'fixed', left: tooltip.x + 12, top: tooltip.y - 36,
+          background: '#1e293b', color: '#fff', borderRadius: '7px',
+          padding: '5px 10px', fontSize: '0.72rem', fontWeight: 500,
+          pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 9999,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        }}>
+          <span style={{ color: RING_META[tooltip.index].color, marginRight: 5 }}>●</span>
+          {RING_META[tooltip.index].label}:{' '}
+          <strong>
+            {tooltipValues
+              ? tooltipValues[tooltip.index]
+              : `${rings[tooltip.index].value.toFixed(0)}%`}
+          </strong>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -331,6 +368,11 @@ function Modal({ business, onClose }) {
             revenuePercent={revenuePercent}
             ticketPercent={ticketPercent}
             screenPercent={screenPercent}
+            tooltipValues={[
+              `${fmtK(business.revenue.actual)} / ${fmtK(business.revenue.target)}`,
+              `${business.tickets.total - business.tickets.open} / ${business.tickets.total} resolved`,
+              `${business.screenUsage}%`,
+            ]}
           />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[
