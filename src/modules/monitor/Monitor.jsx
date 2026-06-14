@@ -30,7 +30,7 @@ const RING_META = [
 function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipValues, size = 108 }) {
   const cx = size / 2
   const cy = size / 2
-  const containerRef = useRef(null)
+  const svgRef = useRef(null)
   const [tooltip, setTooltip] = useState(null)
 
   const rings = [
@@ -39,23 +39,44 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipVa
     { r: 19, sw: 7, value: screenPercent,  color: '#94a3b8', track: '#ef4444' },
   ]
 
-  function handleMouseMove(e, i) {
-    setTooltip({ x: e.clientX, y: e.clientY, index: i })
+  function handleMouseMove(e) {
+    const rect = svgRef.current.getBoundingClientRect()
+    const mx = e.clientX - rect.left
+    const my = e.clientY - rect.top
+    const dist = Math.sqrt((mx - cx) ** 2 + (my - cy) ** 2)
+
+    let hit = null
+    let minDiff = Infinity
+    rings.forEach((ring, i) => {
+      const diff = Math.abs(dist - ring.r)
+      if (diff <= ring.sw / 2 + 5 && diff < minDiff) {
+        hit = i
+        minDiff = diff
+      }
+    })
+
+    if (hit !== null) {
+      setTooltip({ x: e.clientX, y: e.clientY, index: hit })
+    } else {
+      setTooltip(null)
+    }
   }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg
+        ref={svgRef}
+        width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setTooltip(null)}
+        style={{ cursor: 'crosshair', display: 'block' }}
+      >
         {rings.map((ring, i) => {
           const circ = 2 * Math.PI * ring.r
           const dash = Math.max(0, Math.min(ring.value / 100, 1)) * circ
           const gap  = circ - dash
           return (
-            <g key={i}
-              onMouseMove={e => handleMouseMove(e, i)}
-              onMouseLeave={() => setTooltip(null)}
-              style={{ cursor: 'default' }}
-            >
+            <g key={i}>
               <circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={ring.track} strokeWidth={ring.sw} />
               <circle cx={cx} cy={cy} r={ring.r} fill="none"
                 stroke={ring.color} strokeWidth={ring.sw}
@@ -63,7 +84,6 @@ function ActivityRings({ revenuePercent, ticketPercent, screenPercent, tooltipVa
                 strokeLinecap="round"
                 transform={`rotate(-90 ${cx} ${cy})`}
               />
-              <circle cx={cx} cy={cy} r={ring.r} fill="none" stroke="transparent" strokeWidth={ring.sw + 6} />
             </g>
           )
         })}
